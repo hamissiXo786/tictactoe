@@ -28,7 +28,8 @@
     font-size:16px;
     overflow-x:hidden;
     display:flex;flex-direction:column;align-items:center;justify-content:center;
-    gap:18px;padding:16px;
+    gap:18px;
+    padding:max(16px,env(safe-area-inset-top)) max(16px,env(safe-area-inset-right)) max(16px,env(safe-area-inset-bottom)) max(16px,env(safe-area-inset-left));
     user-select:none;-webkit-user-select:none;
   }
   #stars{position:fixed;inset:0;width:100%;height:100%;z-index:0}
@@ -45,23 +46,29 @@
   /* in-game: what you're playing + way back to the menu */
   .gamebar{display:flex;gap:10px;justify-content:center;align-items:center;margin-top:12px}
   .chip{
-    font-size:15px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;
+    display:inline-flex;align-items:center;min-height:40px;
+    font-size:16px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;
     padding:5px 14px;border-radius:999px;border:1px solid rgba(160,150,255,.3);color:var(--text);
   }
   .chip b{color:var(--lvl,#fff);font-weight:700;text-shadow:0 0 10px var(--lvl,transparent)}
   .linkbtn{
     background:transparent;color:var(--text);font-family:var(--body);cursor:pointer;
     border:1px solid rgba(160,150,255,.4);border-radius:999px;
-    padding:5px 16px;font-size:15px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;
-    transition:border-color .25s,color .25s;
+    min-height:40px;padding:5px 16px;font-size:16px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;
+    transition:border-color .25s,color .25s,transform .12s;
   }
+  .linkbtn.icon{width:40px;padding:0;display:inline-grid;place-items:center}
+  .linkbtn.icon svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+  .linkbtn.icon .off,.linkbtn.icon[aria-pressed="false"] .on{display:none}
+  .linkbtn.icon[aria-pressed="false"] .off{display:inline}
   .linkbtn:hover,.linkbtn:focus-visible{border-color:#fff;color:#fff;outline:none}
 
   /* ---------- start screen ---------- */
   .menu{
     position:fixed;inset:0;z-index:5;overflow-y:auto;
     display:flex;flex-direction:column;align-items:center;justify-content:center;
-    padding:24px 16px;text-align:center;
+    padding:max(24px,env(safe-area-inset-top)) max(16px,env(safe-area-inset-right)) max(24px,env(safe-area-inset-bottom)) max(16px,env(safe-area-inset-left));
+    text-align:center;
     transition:opacity .4s,visibility 0s .4s;
   }
   body.in-menu header,body.in-menu .stage-wrap{visibility:hidden}
@@ -72,7 +79,7 @@
   .menu fieldset{border:0;margin:30px 0 0;padding:0;min-width:0;width:min(100%,420px);transition:opacity .3s}
   .menu fieldset[disabled]{opacity:.3}
   .menu legend{
-    padding:0;margin:0 auto 12px;font-size:14px;font-weight:600;letter-spacing:.3em;
+    padding:0;margin:0 auto 12px;font-size:16px;font-weight:600;letter-spacing:.3em;
     text-transform:uppercase;color:var(--text);opacity:.8;
   }
   .seg-group{display:flex;gap:8px}
@@ -95,8 +102,22 @@
   .opt.easy{--c:#5dffa8}
   .opt.medium{--c:#ffd24a}
   .opt.hard{--c:#ff4d6a}
-  .hint{margin-top:12px;min-height:22px;font-size:16px;font-weight:500;letter-spacing:.08em;opacity:.85}
+  .hint{margin-top:12px;min-height:22px;font-size:17px;font-weight:500;letter-spacing:.08em;opacity:.85}
   .menu .start{margin-top:34px;--c:var(--x);padding:12px 54px;font-size:22px}
+  .prefs{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-top:24px}
+  .pref{
+    display:inline-flex;align-items:center;gap:8px;min-height:40px;padding:5px 16px;
+    background:transparent;color:var(--text);cursor:pointer;font-family:var(--body);
+    font-size:16px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;
+    border:1px solid rgba(160,150,255,.3);border-radius:999px;transition:border-color .25s,transform .12s;
+  }
+  .pref:hover,.pref:focus-visible{border-color:#fff;outline:none}
+  .pref .dot{width:9px;height:9px;border-radius:50%;border:1px solid currentColor;opacity:.6}
+  .pref[aria-pressed="true"]{color:#fff}
+  .pref[aria-pressed="true"] .dot{background:var(--x);border-color:var(--x);opacity:1;box-shadow:0 0 8px var(--x)}
+
+  /* pressed feel on every button */
+  .btn:active,.opt:active:not(:disabled),.linkbtn:active,.pref:active{transform:scale(.95)}
 
   .scores{display:flex;gap:10px;justify-content:center;margin-top:14px}
   .score{
@@ -111,7 +132,8 @@
   .score.sd{opacity:.75}
   .score svg{width:16px;height:16px;flex:none;overflow:visible}
   .score svg *{fill:none;stroke:currentColor;stroke-width:14;stroke-linecap:round}
-  .score .lbl{font-size:14px;font-weight:600;letter-spacing:.12em;text-transform:uppercase}
+  .score .lbl:empty{display:none}
+  .score .lbl{font-size:16px;font-weight:600;letter-spacing:.12em;text-transform:uppercase}
   .score b{
     font-family:var(--body);font-weight:700;font-size:22px;line-height:1;
     font-variant-numeric:tabular-nums;color:#fff;text-shadow:0 0 10px var(--c);
@@ -159,6 +181,8 @@
     backdrop-filter:none;
   }
   .board.rebuild{animation:rebuild .7s ease-out}
+  .board.flash{animation:flash .5s ease-out}
+  @keyframes flash{0%{border-color:#fff;box-shadow:0 0 70px var(--fc),inset 0 0 60px var(--fc)}}
   @keyframes rebuild{from{opacity:0;transform:scale(.85)}to{opacity:1;transform:none}}
 
   .ripples{position:absolute;inset:0;border-radius:22px;overflow:hidden;pointer-events:none}
@@ -213,7 +237,7 @@
 
   .board.over .cell:not(.win) svg{opacity:.3;transition:opacity .5s}
   .board.over .cell:not(.win) g,.board.over .cell:not(.win) .mark{animation:none;filter:none;stroke-dashoffset:0}
-  .cell.win .mark{animation:pulseWin 1s ease-in-out infinite}
+  .cell.win .mark{animation:pulseWin 1s ease-in-out infinite;stroke-dashoffset:0}
   @keyframes pulseWin{50%{stroke-width:11}}
 
   /* ---------- winning line + ignite ---------- */
@@ -255,6 +279,8 @@
     text-shadow:0 0 10px currentColor,0 0 24px currentColor;
     transition:color .3s;
   }
+  .status.thinking{animation:think 1.1s ease-in-out infinite}
+  @keyframes think{50%{opacity:.45}}
 
   /* ---------- result popup ---------- */
   .overlay{
@@ -280,10 +306,11 @@
   .sub{margin-top:12px;font-size:18px;font-weight:600;letter-spacing:.22em;opacity:.9;text-transform:uppercase}
   .tally{
     margin-top:18px;display:flex;gap:18px;justify-content:center;
-    font-size:15px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:var(--text);
+    font-size:16px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:var(--text);
   }
   .tally b{font-weight:700;font-size:20px;margin-left:6px;color:#fff;font-variant-numeric:tabular-nums}
   .tally .tx{color:var(--x)}
+  .tally i{font-style:normal;font-family:var(--display);font-weight:700;letter-spacing:.05em}
   .tally .to{color:var(--o)}
   .tally:empty{display:none}
   .btns{display:flex;gap:14px;justify-content:center;margin-top:28px;flex-wrap:wrap}
@@ -303,14 +330,15 @@
 
   @media (max-height:560px) and (orientation:landscape){
     body{flex-direction:row;gap:clamp(24px,6vw,64px)}
-    .menu{padding:14px 16px}
+    .menu{padding:12px 16px}
     .menu h1{font-size:clamp(20px,4.5vw,30px)}
     .menu .tag{display:none}
-    .menu fieldset{margin-top:12px}
+    .menu fieldset{margin-top:8px}
     .menu legend{margin-bottom:8px}
     .opt{padding:8px;font-size:16px}
     .hint{margin-top:6px;font-size:15px}
     .menu .start{margin-top:12px;padding:8px 44px;font-size:19px}
+    .prefs{margin-top:10px}
     .stage-wrap{width:auto}
     .stage{width:clamp(200px,100dvh - 130px,420px)}
     .status{margin-bottom:12px}
@@ -318,14 +346,14 @@
   }
   @media (max-width:360px){
     .score{min-width:0;padding:6px 10px}
-    .score .lbl{font-size:12px}
+    .score .lbl{font-size:14px}
   }
 
-  @media (prefers-reduced-motion:reduce){
-    .stage,.shadow,.glow-x,.glow-o{animation:none}
-    .menu{transition:none}
-    .winline line{animation:none;stroke-dashoffset:0}
-  }
+  /* reduced motion: set from the OS preference or the in-game toggle */
+  body.calm .stage,body.calm .shadow,body.calm .glow-x,body.calm .glow-o,
+  body.calm .cell.win .mark,body.calm .status.thinking{animation:none}
+  body.calm .menu{transition:none}
+  body.calm .winline line{animation:none;stroke-dashoffset:0}
 </style>
 </head>
 <body class="in-menu">
@@ -354,12 +382,20 @@
   </fieldset>
 
   <button class="btn primary start" id="startBtn">Start</button>
+
+  <div class="prefs">
+    <button class="pref" id="soundPref" aria-pressed="true"><span class="dot"></span>Sound</button>
+    <button class="pref" id="motionPref" aria-pressed="false"><span class="dot"></span>Reduce motion</button>
+  </div>
 </section>
 
 <header>
   <h1>Tic Tac Toe</h1>
   <div class="gamebar">
     <span class="chip" id="modeChip"></span>
+    <button class="linkbtn icon" id="soundBtn" aria-label="Sound" aria-pressed="true">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9h4l5-4v14l-5-4H4z"/><path class="on" d="M16.5 8.5a5 5 0 0 1 0 7M19 6a8.5 8.5 0 0 1 0 12"/><path class="off" d="M17 9l5 6M22 9l-5 6"/></svg>
+    </button>
     <button class="linkbtn" id="menuBtn">Menu</button>
   </div>
   <div class="scores" aria-label="Score">
@@ -412,7 +448,8 @@
   const resultSub = document.getElementById('resultSub');
   const resultBtns = document.getElementById('resultBtns');
   const resultTally = document.getElementById('resultTally');
-  const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  let reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;   // may be overridden by the in-game toggle
+  let soundOn = true;
   const sleep = ms => new Promise(r => setTimeout(r, ms));
 
   const LEVELS = {
@@ -501,12 +538,89 @@
     }, 140);
   }
 
+  // ---------- sound (synthesised with Web Audio, no files) ----------
+  let actx = null;
+  function audio() {
+    if (!soundOn) return null;
+    try { actx = actx || new (window.AudioContext || window.webkitAudioContext)(); } catch (e) { return null; }
+    if (actx.state === 'suspended') actx.resume();
+    return actx;
+  }
+  function tone(freq, {at = 0, dur = .12, type = 'triangle', vol = .14, to = null} = {}) {
+    const ac = audio(); if (!ac) return;
+    const t = ac.currentTime + at, o = ac.createOscillator(), g = ac.createGain();
+    o.type = type;
+    o.frequency.setValueAtTime(freq, t);
+    if (to) o.frequency.exponentialRampToValueAtTime(to, t + dur);
+    g.gain.setValueAtTime(.0001, t);
+    g.gain.exponentialRampToValueAtTime(vol, t + .012);
+    g.gain.exponentialRampToValueAtTime(.0001, t + dur);
+    o.connect(g).connect(ac.destination);
+    o.start(t); o.stop(t + dur + .03);
+  }
+  function whoosh(dur = .55, vol = .16) {
+    const ac = audio(); if (!ac) return;
+    const t = ac.currentTime, len = Math.floor(ac.sampleRate * dur);
+    const buf = ac.createBuffer(1, len, ac.sampleRate), d = buf.getChannelData(0);
+    for (let k = 0; k < len; k++) d[k] = (Math.random() * 2 - 1) * (1 - k / len);
+    const src = ac.createBufferSource(), f = ac.createBiquadFilter(), g = ac.createGain();
+    src.buffer = buf;
+    f.type = 'bandpass'; f.Q.value = .8;
+    f.frequency.setValueAtTime(2400, t); f.frequency.exponentialRampToValueAtTime(260, t + dur);
+    g.gain.value = vol;
+    src.connect(f).connect(g).connect(ac.destination);
+    src.start(t);
+  }
+  // one sound per event, scaled to how much the event matters
+  const sfx = {
+    X:     () => tone(620, {to: 930, dur: .09}),
+    O:     () => tone(520, {to: 350, dur: .11}),
+    nope:  () => tone(150, {type: 'square', vol: .04, dur: .07}),
+    click: () => tone(1250, {type: 'sine', vol: .05, dur: .04}),
+    win:   () => [523, 659, 784, 1047].forEach((f, k) => tone(f, {at: .05 + k * .09, dur: .24, vol: .12})),
+    lose:  () => [392, 311, 262].forEach((f, k) => tone(f, {at: .05 + k * .15, dur: .28, type: 'sawtooth', vol: .045})),
+    draw:  () => { tone(392, {dur: .16, vol: .1}); tone(370, {at: .15, dur: .26, vol: .1}); },
+    burst: () => whoosh()
+  };
+
+  // ---------- screen shake (decaying trauma, applied to the board's wrapper) ----------
+  const shakeEl = document.querySelector('.stage-wrap');
+  let trauma = 0, shakeT = 0, shaking = false;
+  function addTrauma(amount) {
+    if (reduce) return;
+    trauma = Math.min(1, trauma + amount);
+    if (shaking) return;
+    shaking = true;
+    let last = performance.now();
+    requestAnimationFrame(function step(now) {
+      const dt = Math.min(.05, (now - last) / 1000); last = now;
+      trauma = Math.max(0, trauma - 1.4 * dt);
+      shakeT += dt * 30;
+      const k = trauma * trauma;      // gentle when small, punchy when big
+      shakeEl.style.transform = trauma
+        ? `translate(${12 * k * Math.sin(shakeT * 1.7)}px,${8 * k * Math.sin(shakeT * 2.3)}px) rotate(${1.5 * k * Math.sin(shakeT * 1.1)}deg)`
+        : '';
+      if (trauma > 0) requestAnimationFrame(step); else shaking = false;
+    });
+  }
+
+  // tapping a cell you can't play: small wiggle + buzz
+  function nope(i) {
+    sfx.nope();
+    if (reduce) return;
+    cells[i].animate(
+      [{transform: 'translateX(0)'}, {transform: 'translateX(-5px)'}, {transform: 'translateX(5px)'},
+       {transform: 'translateX(-3px)'}, {transform: 'translateX(0)'}],
+      {duration: 240, easing: 'ease-out'}
+    );
+  }
+
   // ---------- game flow ----------
   function reset(rebuild) {
     seq++;                       // cancels any running win sequence
     state = Array(9).fill(null);
     turn = 'X'; over = false; busy = false;
-    boardEl.classList.remove('over', 'broken', 'shake');
+    boardEl.classList.remove('over', 'broken', 'shake', 'flash');
     boardEl.querySelectorAll('.winline').forEach(n => n.remove());
     sparksEl.replaceChildren();
     buildGrid();
@@ -531,6 +645,7 @@
     statusEl.style.color = COLORS[turn];
     boardEl.dataset.turn = turn;
     boardEl.classList.toggle('locked', over || busy || (mode === 'cpu' && turn !== 'X'));
+    statusEl.classList.toggle('thinking', !over && mode === 'cpu' && turn === 'O');
     document.getElementById('tx').classList.toggle('turn', !over && turn === 'X');
     document.getElementById('to').classList.toggle('turn', !over && turn === 'O');
   }
@@ -541,8 +656,8 @@
   }
 
   function onTap(i, e) {
-    if (over || busy || state[i]) return;
-    if (mode === 'cpu' && turn !== 'X') return;
+    if (over) return;
+    if (busy || state[i] || (mode === 'cpu' && turn !== 'X')) return nope(i);
     let x, y;
     const rect = boardEl.getBoundingClientRect();
     if (e) { x = e.clientX - rect.left; y = e.clientY - rect.top; }
@@ -557,9 +672,18 @@
     const p = turn;
     state[i] = p;
     cells[i].classList.add('filled');
-    cells[i].appendChild(markSVG(p));
+    const svg = markSVG(p);
+    cells[i].appendChild(svg);
     labelCell(i);
     ripple(x, y, COLORS[p]);
+    sfx[p]();
+    if (!reduce) {
+      // squash in and overshoot slightly, then settle
+      svg.animate(
+        [{transform: 'scale(.55)'}, {transform: 'scale(1.12)', offset: .6}, {transform: 'scale(1)'}],
+        {duration: 300, easing: 'cubic-bezier(.2,.8,.3,1)'}
+      );
+    }
 
     const win = findWin(state);
     if (win) return finish(p, win);
@@ -676,11 +800,17 @@
       updateScores(winner);
       line.forEach(i => cells[i].classList.add('win'));
       boardEl.classList.add('over');
+      (mode === 'cpu' && winner === 'O' ? sfx.lose : sfx.win)();
+      if (!reduce) {
+        boardEl.style.setProperty('--fc', COLORS[winner]);
+        boardEl.classList.remove('flash'); void boardEl.offsetWidth; boardEl.classList.add('flash');
+      }
       drawWinLine(line, COLORS[winner]);
       winSequence(winner, line, alive, my);
     } else {
       scores.D++;
       updateScores('D');
+      sfx.draw();
       if (!reduce) { boardEl.classList.remove('shake'); void boardEl.offsetWidth; boardEl.classList.add('shake'); }
       sleep(reduce ? 400 : 900).then(() => {
         if (!alive()) return;
@@ -700,6 +830,7 @@
     await sleep(950);                    // winning line finishes drawing
     if (!alive()) return;
     ignite(line, color, my);
+    addTrauma(.3);
     await sleep(1200);                   // line burns
     if (!alive()) return;
     breakUp(line, color);
@@ -782,6 +913,8 @@
 
   function breakUp(line, color) {
     boardEl.classList.add('broken');
+    addTrauma(.75);
+    sfx.burst();
     const pieces = [
       ...boardEl.querySelectorAll('.seg'),
       ...boardEl.querySelectorAll('.cell svg')
@@ -809,7 +942,7 @@
   // ---------- popup ----------
   function retryButtons(color) {
     return [
-      {label: 'Try again', primary: true, color, onClick: () => reset(true)},
+      {label: 'Try again', primary: true, color, onClick: () => { reset(true); focusBoard(); }},
       {label: 'Quit', color, onClick: quitGame}
     ];
   }
@@ -820,7 +953,7 @@
     resultSub.textContent = sub;
     const n = names();
     resultTally.innerHTML =
-      `<span class="tx">${n.X}<b>${scores.X}</b></span><span>Draw<b>${scores.D}</b></span><span class="to">${n.O}<b>${scores.O}</b></span>`;
+      `<span class="tx"><i>${n.X}</i><b>${scores.X}</b></span><span>Draw<b>${scores.D}</b></span><span class="to"><i>${n.O}</i><b>${scores.O}</b></span>`;
     resultBtns.replaceChildren();
     buttons.forEach(b => {
       const el = document.createElement('button');
@@ -833,10 +966,15 @@
     overlay.classList.remove('show');
     void overlay.offsetWidth;
     overlay.classList.add('show');
+    behind.forEach(el => el.inert = true);
     setTimeout(() => { if (resultBtns.firstChild) resultBtns.firstChild.focus({preventScroll: true}); }, 450);
   }
 
-  function hideOverlay() { overlay.classList.remove('show'); }
+  const behind = [document.querySelector('header'), shakeEl];
+  function hideOverlay() {
+    overlay.classList.remove('show');
+    behind.forEach(el => el.inert = false);
+  }
 
   function quitGame() {
     showOverlay('THANKS FOR PLAYING', '#cfd3ff', 'Final score', [{
@@ -863,8 +1001,8 @@
     diffSet.disabled = mode !== 'cpu';
     diffHint.textContent = mode === 'cpu' ? LEVELS[level].hint : 'Difficulty only applies against the computer';
   }
-  modeBtns.forEach(b => b.onclick = () => { mode = b.dataset.mode; renderMenu(); });
-  levelBtns.forEach(b => b.onclick = () => { level = b.dataset.level; renderMenu(); });
+  modeBtns.forEach(b => b.onclick = () => { mode = b.dataset.mode; renderMenu(); sfx.click(); });
+  levelBtns.forEach(b => b.onclick = () => { level = b.dataset.level; renderMenu(); sfx.click(); });
 
   function openMenu() {
     seq++;                       // stop any running win sequence or CPU turn
@@ -878,8 +1016,8 @@
   function startGame() {
     try { localStorage.setItem('ttt-setup', JSON.stringify({mode, level})); } catch (e) {}
     const n = names();
-    document.getElementById('lx').textContent = n.X;
-    document.getElementById('lo').textContent = n.O;
+    document.getElementById('lx').textContent = mode === 'cpu' ? n.X : '';   // in 2P the icon says it all
+    document.getElementById('lo').textContent = mode === 'cpu' ? n.O : '';
     const chip = document.getElementById('modeChip');
     if (mode === 'cpu') {
       chip.innerHTML = `vs CPU · <b>${LEVELS[level].label}</b>`;
@@ -891,7 +1029,28 @@
     updateScores();
     document.body.classList.remove('in-menu');
     reset(true);
+    focusBoard();
   }
+
+  // put keyboard focus on the board so arrow keys work straight away
+  function focusBoard() {
+    setTimeout(() => cells[4].focus({preventScroll: true}), 30);
+  }
+
+  boardEl.addEventListener('keydown', e => {
+    const i = cells.indexOf(document.activeElement);
+    if (i < 0) return;
+    const moves = {ArrowLeft: [0, -1], ArrowRight: [0, 1], ArrowUp: [-1, 0], ArrowDown: [1, 0]};
+    if (!moves[e.key]) return;
+    e.preventDefault();
+    const r = Math.min(2, Math.max(0, Math.floor(i / 3) + moves[e.key][0]));
+    const c = Math.min(2, Math.max(0, i % 3 + moves[e.key][1]));
+    cells[r * 3 + c].focus();
+  });
+
+  addEventListener('keydown', e => {
+    if (e.key === 'Escape' && !document.body.classList.contains('in-menu') && !overlay.classList.contains('show')) openMenu();
+  });
   document.getElementById('startBtn').onclick = startGame;
   document.getElementById('menuBtn').onclick = openMenu;
 
@@ -909,7 +1068,8 @@
     }));
   }
   addEventListener('resize', resize); resize();
-  (function tick() {
+  let starsRunning = false;
+  function tick() {
     ctx.clearRect(0, 0, W, H);
     for (const s of stars) {
       s.y += s.v; s.t += .02;
@@ -918,8 +1078,31 @@
       ctx.fillStyle = '#cdd2ff';
       ctx.beginPath(); ctx.arc(s.x, s.y, s.r, 0, 6.283); ctx.fill();
     }
-    if (!reduce) requestAnimationFrame(tick);
-  })();
+    starsRunning = !reduce;
+    if (starsRunning) requestAnimationFrame(tick);
+  }
+  tick();
+
+  // ---------- preferences: sound + reduced motion ----------
+  try {
+    const prefs = JSON.parse(localStorage.getItem('ttt-prefs'));
+    if (prefs && typeof prefs.sound === 'boolean') soundOn = prefs.sound;
+    if (prefs && typeof prefs.calm === 'boolean') reduce = prefs.calm;
+  } catch (e) {}
+
+  function applyPrefs(save) {
+    document.body.classList.toggle('calm', reduce);
+    document.getElementById('soundPref').setAttribute('aria-pressed', soundOn);
+    document.getElementById('soundBtn').setAttribute('aria-pressed', soundOn);
+    document.getElementById('motionPref').setAttribute('aria-pressed', reduce);
+    if (!reduce && !starsRunning) tick();
+    if (save) try { localStorage.setItem('ttt-prefs', JSON.stringify({sound: soundOn, calm: reduce})); } catch (e) {}
+  }
+  const toggleSound = () => { soundOn = !soundOn; applyPrefs(true); sfx.click(); };
+  document.getElementById('soundPref').onclick = toggleSound;
+  document.getElementById('soundBtn').onclick = toggleSound;
+  document.getElementById('motionPref').onclick = () => { reduce = !reduce; applyPrefs(true); sfx.click(); };
+  applyPrefs(false);
 
   reset();
   openMenu();
