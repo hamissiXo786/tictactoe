@@ -42,18 +42,61 @@
     text-shadow:0 0 8px #fff,0 0 18px var(--line),0 0 38px var(--line);
   }
 
-  .modes{display:flex;gap:8px;justify-content:center;margin-top:12px}
-  .modes button{
-    background:transparent;color:var(--text);font-family:var(--body);
+  /* in-game: what you're playing + way back to the menu */
+  .gamebar{display:flex;gap:10px;justify-content:center;align-items:center;margin-top:12px}
+  .chip{
+    font-size:15px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;
+    padding:5px 14px;border-radius:999px;border:1px solid rgba(160,150,255,.3);color:var(--text);
+  }
+  .chip b{color:var(--lvl,#fff);font-weight:700;text-shadow:0 0 10px var(--lvl,transparent)}
+  .linkbtn{
+    background:transparent;color:var(--text);font-family:var(--body);cursor:pointer;
     border:1px solid rgba(160,150,255,.4);border-radius:999px;
-    padding:6px 18px;font-size:16px;font-weight:600;letter-spacing:.1em;cursor:pointer;
-    transition:all .25s;
+    padding:5px 16px;font-size:15px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;
+    transition:border-color .25s,color .25s;
   }
-  .modes button.active{
-    border-color:var(--x);color:#fff;
-    box-shadow:0 0 14px rgba(24,232,255,.55),inset 0 0 10px rgba(24,232,255,.25);
+  .linkbtn:hover,.linkbtn:focus-visible{border-color:#fff;color:#fff;outline:none}
+
+  /* ---------- start screen ---------- */
+  .menu{
+    position:fixed;inset:0;z-index:5;overflow-y:auto;
+    display:flex;flex-direction:column;align-items:center;justify-content:center;
+    padding:24px 16px;text-align:center;
+    transition:opacity .4s,visibility 0s .4s;
   }
-  .modes button:hover{border-color:#fff}
+  body.in-menu header,body.in-menu .stage-wrap{visibility:hidden}
+  body:not(.in-menu) .menu{opacity:0;visibility:hidden;pointer-events:none}
+  body.in-menu .menu{transition:opacity .4s}
+  .menu h1{font-size:clamp(24px,7vw,42px)}
+  .menu .tag{margin-top:10px;font-size:17px;font-weight:600;letter-spacing:.24em;text-transform:uppercase;opacity:.7}
+  .menu fieldset{border:0;margin:30px 0 0;padding:0;min-width:0;width:min(100%,420px);transition:opacity .3s}
+  .menu fieldset[disabled]{opacity:.3}
+  .menu legend{
+    padding:0;margin:0 auto 12px;font-size:14px;font-weight:600;letter-spacing:.3em;
+    text-transform:uppercase;color:var(--text);opacity:.8;
+  }
+  .seg-group{display:flex;gap:8px}
+  .opt{
+    --c:var(--x);
+    flex:1;min-width:0;background:rgba(20,12,50,.45);color:var(--text);cursor:pointer;
+    font-family:var(--body);font-weight:600;font-size:18px;letter-spacing:.1em;text-transform:uppercase;
+    border:1px solid rgba(160,150,255,.3);border-radius:14px;padding:12px 8px;
+    transition:border-color .25s,box-shadow .25s,color .25s,transform .2s;
+  }
+  .opt:hover:not(:disabled),.opt:focus-visible{border-color:#fff;outline:none}
+  .opt[aria-pressed="true"]{
+    border-color:var(--c);color:#fff;
+    box-shadow:0 0 16px color-mix(in srgb,var(--c) 55%,transparent),inset 0 0 12px color-mix(in srgb,var(--c) 25%,transparent);
+  }
+  .opt:disabled{cursor:default}
+  .opt .pips{display:flex;gap:4px;justify-content:center;margin-top:7px}
+  .opt .pips i{width:7px;height:7px;border-radius:50%;border:1px solid var(--c);opacity:.5}
+  .opt .pips i.on{background:var(--c);opacity:1;box-shadow:0 0 6px var(--c)}
+  .opt.easy{--c:#5dffa8}
+  .opt.medium{--c:#ffd24a}
+  .opt.hard{--c:#ff4d6a}
+  .hint{margin-top:12px;min-height:22px;font-size:16px;font-weight:500;letter-spacing:.08em;opacity:.85}
+  .menu .start{margin-top:34px;--c:var(--x);padding:12px 54px;font-size:22px}
 
   .scores{display:flex;gap:10px;justify-content:center;margin-top:14px}
   .score{
@@ -161,11 +204,11 @@
   .glow-o{animation:pulseO 2.2s ease-in-out infinite .6s}
   @keyframes pulseX{
     0%,100%{filter:drop-shadow(0 0 2px var(--x)) drop-shadow(0 0 6px var(--x))}
-    50%{filter:drop-shadow(0 0 4px var(--x)) drop-shadow(0 0 14px var(--x))}
+    50%{filter:drop-shadow(0 0 3px var(--x)) drop-shadow(0 0 10px var(--x))}
   }
   @keyframes pulseO{
     0%,100%{filter:drop-shadow(0 0 2px var(--o)) drop-shadow(0 0 6px var(--o))}
-    50%{filter:drop-shadow(0 0 4px var(--o)) drop-shadow(0 0 14px var(--o))}
+    50%{filter:drop-shadow(0 0 3px var(--o)) drop-shadow(0 0 10px var(--o))}
   }
 
   .board.over .cell:not(.win) svg{opacity:.3;transition:opacity .5s}
@@ -260,6 +303,14 @@
 
   @media (max-height:560px) and (orientation:landscape){
     body{flex-direction:row;gap:clamp(24px,6vw,64px)}
+    .menu{padding:14px 16px}
+    .menu h1{font-size:clamp(20px,4.5vw,30px)}
+    .menu .tag{display:none}
+    .menu fieldset{margin-top:12px}
+    .menu legend{margin-bottom:8px}
+    .opt{padding:8px;font-size:16px}
+    .hint{margin-top:6px;font-size:15px}
+    .menu .start{margin-top:12px;padding:8px 44px;font-size:19px}
     .stage-wrap{width:auto}
     .stage{width:clamp(200px,100dvh - 130px,420px)}
     .status{margin-bottom:12px}
@@ -272,18 +323,44 @@
 
   @media (prefers-reduced-motion:reduce){
     .stage,.shadow,.glow-x,.glow-o{animation:none}
+    .menu{transition:none}
     .winline line{animation:none;stroke-dashoffset:0}
   }
 </style>
 </head>
-<body>
+<body class="in-menu">
 <canvas id="stars"></canvas>
+
+<section class="menu" id="menu" aria-labelledby="menuTitle">
+  <h1 id="menuTitle">Tic Tac Toe</h1>
+  <div class="tag">Choose your game</div>
+
+  <fieldset>
+    <legend>Opponent</legend>
+    <div class="seg-group">
+      <button class="opt" data-mode="cpu">vs Computer</button>
+      <button class="opt" data-mode="2p" style="--c:var(--o)">2 Players</button>
+    </div>
+  </fieldset>
+
+  <fieldset id="diffSet">
+    <legend>Difficulty</legend>
+    <div class="seg-group">
+      <button class="opt easy" data-level="easy">Easy<span class="pips"><i class="on"></i><i></i><i></i></span></button>
+      <button class="opt medium" data-level="medium">Medium<span class="pips"><i class="on"></i><i class="on"></i><i></i></span></button>
+      <button class="opt hard" data-level="hard">Hard<span class="pips"><i class="on"></i><i class="on"></i><i class="on"></i></span></button>
+    </div>
+    <div class="hint" id="diffHint" aria-live="polite"></div>
+  </fieldset>
+
+  <button class="btn primary start" id="startBtn">Start</button>
+</section>
 
 <header>
   <h1>Tic Tac Toe</h1>
-  <div class="modes">
-    <button id="mCpu" class="active" aria-pressed="true">vs Computer</button>
-    <button id="m2p" aria-pressed="false">2 Players</button>
+  <div class="gamebar">
+    <span class="chip" id="modeChip"></span>
+    <button class="linkbtn" id="menuBtn">Menu</button>
   </div>
   <div class="scores" aria-label="Score">
     <div class="score sx" id="tx">
@@ -338,7 +415,12 @@
   const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
   const sleep = ms => new Promise(r => setTimeout(r, ms));
 
-  let cells = [], state, turn, over, mode = 'cpu', busy, seq = 0;
+  const LEVELS = {
+    easy:   {label: 'Easy',   color: '#5dffa8', hint: 'Plays loose and misses plenty'},
+    medium: {label: 'Medium', color: '#ffd24a', hint: 'Takes wins and blocks, but can be tricked'},
+    hard:   {label: 'Hard',   color: '#ff4d6a', hint: 'Perfect play. The best you can do is draw'}
+  };
+  let cells = [], state, turn, over, mode = 'cpu', level = 'medium', busy, seq = 0;
   const scores = {X:0, O:0, D:0};
 
   // ---------- build board ----------
@@ -486,22 +568,75 @@
     turn = p === 'X' ? 'O' : 'X';
     if (mode === 'cpu' && turn === 'O') {
       busy = true;
-      setTimeout(computerMove, 650 + Math.random() * 400);
+      const my = seq;              // drop the move if the game was reset meanwhile
+      setTimeout(() => { if (seq === my) computerMove(); }, 650 + Math.random() * 400);
     }
     setStatus();
   }
 
-  // Easy AI: mostly random, occasionally spots a quick win
+  // ---------- computer opponent ----------
+  const pickRandom = a => a[Math.floor(Math.random() * a.length)];
+  const freeCells = s => s.map((v, i) => v ? null : i).filter(v => v !== null);
+
+  // a cell where player p completes a line, if any
+  function winningMove(s, p) {
+    for (const i of freeCells(s)) {
+      const t = s.slice(); t[i] = p;
+      if (findWin(t)) return i;
+    }
+    return null;
+  }
+
+  // full-depth search; prefers quicker wins and slower losses
+  function minimax(s, p, depth) {
+    const w = findWin(s);
+    if (w) return s[w[0]] === 'O' ? 10 - depth : depth - 10;
+    const free = freeCells(s);
+    if (!free.length) return 0;
+    let best = p === 'O' ? -Infinity : Infinity;
+    for (const i of free) {
+      s[i] = p;
+      const v = minimax(s, p === 'O' ? 'X' : 'O', depth + 1);
+      s[i] = null;
+      best = p === 'O' ? Math.max(best, v) : Math.min(best, v);
+    }
+    return best;
+  }
+
+  function chooseMove() {
+    const free = freeCells(state);
+    if (level === 'easy') {
+      // mostly random, occasionally spots a quick win
+      if (Math.random() < 0.25) {
+        const w = winningMove(state, 'O');
+        if (w !== null) return w;
+      }
+      return pickRandom(free);
+    }
+    if (level === 'medium') {
+      // always wins or blocks when it can, otherwise plays loosely, so forks beat it
+      const w = winningMove(state, 'O');
+      if (w !== null) return w;
+      const b = winningMove(state, 'X');
+      if (b !== null) return b;
+      if (state[4] === null && Math.random() < 0.5) return 4;
+      return pickRandom(free);
+    }
+    // hard: best move, random among equally good ones so games vary
+    let best = -Infinity, picks = [];
+    for (const i of free) {
+      state[i] = 'O';
+      const v = minimax(state, 'X', 1);
+      state[i] = null;
+      if (v > best) { best = v; picks = [i]; }
+      else if (v === best) picks.push(i);
+    }
+    return pickRandom(picks);
+  }
+
   function computerMove() {
     if (over) return;
-    const free = state.map((v, i) => v ? null : i).filter(v => v !== null);
-    let pick = free[Math.floor(Math.random() * free.length)];
-    if (Math.random() < 0.25) {
-      for (const i of free) {
-        const t = state.slice(); t[i] = 'O';
-        if (findWin(t)) { pick = i; break; }
-      }
-    }
+    const pick = chooseMove();
     busy = false;
     const rect = boardEl.getBoundingClientRect();
     const cr = cells[pick].getBoundingClientRect();
@@ -705,28 +840,60 @@
 
   function quitGame() {
     showOverlay('THANKS FOR PLAYING', '#cfd3ff', 'Final score', [{
-      label: 'New game', primary: true,
-      onClick: () => { scores.X = scores.O = scores.D = 0; updateScores(); reset(true); }
+      label: 'Main menu', primary: true, onClick: openMenu
     }]);
   }
 
-  // ---------- controls ----------
-  function setMode(m) {
-    mode = m;
-    for (const [id, v] of [['mCpu', 'cpu'], ['m2p', '2p']]) {
-      const b = document.getElementById(id);
-      b.classList.toggle('active', m === v);
-      b.setAttribute('aria-pressed', m === v);
-    }
+  // ---------- start screen ----------
+  const menuEl = document.getElementById('menu');
+  const diffSet = document.getElementById('diffSet');
+  const diffHint = document.getElementById('diffHint');
+  const modeBtns = [...menuEl.querySelectorAll('[data-mode]')];
+  const levelBtns = [...menuEl.querySelectorAll('[data-level]')];
+
+  try {
+    const saved = JSON.parse(localStorage.getItem('ttt-setup'));
+    if (saved && ['cpu', '2p'].includes(saved.mode)) mode = saved.mode;
+    if (saved && LEVELS[saved.level]) level = saved.level;
+  } catch (e) {}
+
+  function renderMenu() {
+    modeBtns.forEach(b => b.setAttribute('aria-pressed', b.dataset.mode === mode));
+    levelBtns.forEach(b => b.setAttribute('aria-pressed', b.dataset.level === level));
+    diffSet.disabled = mode !== 'cpu';
+    diffHint.textContent = mode === 'cpu' ? LEVELS[level].hint : 'Difficulty only applies against the computer';
+  }
+  modeBtns.forEach(b => b.onclick = () => { mode = b.dataset.mode; renderMenu(); });
+  levelBtns.forEach(b => b.onclick = () => { level = b.dataset.level; renderMenu(); });
+
+  function openMenu() {
+    seq++;                       // stop any running win sequence or CPU turn
+    over = true;
+    hideOverlay();
+    renderMenu();
+    document.body.classList.add('in-menu');
+    setTimeout(() => menuEl.querySelector('.start').focus({preventScroll: true}), 50);
+  }
+
+  function startGame() {
+    try { localStorage.setItem('ttt-setup', JSON.stringify({mode, level})); } catch (e) {}
     const n = names();
     document.getElementById('lx').textContent = n.X;
     document.getElementById('lo').textContent = n.O;
+    const chip = document.getElementById('modeChip');
+    if (mode === 'cpu') {
+      chip.innerHTML = `vs CPU · <b>${LEVELS[level].label}</b>`;
+      chip.style.setProperty('--lvl', LEVELS[level].color);
+    } else {
+      chip.textContent = '2 Players';
+    }
     scores.X = scores.O = scores.D = 0;
     updateScores();
-    reset();
+    document.body.classList.remove('in-menu');
+    reset(true);
   }
-  document.getElementById('mCpu').onclick = () => setMode('cpu');
-  document.getElementById('m2p').onclick = () => setMode('2p');
+  document.getElementById('startBtn').onclick = startGame;
+  document.getElementById('menuBtn').onclick = openMenu;
 
   // ---------- starfield ----------
   const cv = document.getElementById('stars'), ctx = cv.getContext('2d');
@@ -755,6 +922,7 @@
   })();
 
   reset();
+  openMenu();
 })();
 </script>
 </body>
