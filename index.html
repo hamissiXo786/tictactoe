@@ -76,7 +76,7 @@
   body.in-menu .menu{transition:opacity .4s}
   .menu h1{font-size:clamp(24px,7vw,42px)}
   .menu .tag{margin-top:10px;font-size:17px;font-weight:600;letter-spacing:.24em;text-transform:uppercase;opacity:.7}
-  .menu fieldset{border:0;margin:30px 0 0;padding:0;min-width:0;width:min(100%,420px);transition:opacity .3s}
+  .menu fieldset{border:0;margin:22px 0 0;padding:0;min-width:0;width:min(100%,420px);transition:opacity .3s}
   .menu fieldset[disabled]{opacity:.3}
   .menu legend{
     padding:0;margin:0 auto 12px;font-size:16px;font-weight:600;letter-spacing:.3em;
@@ -96,6 +96,7 @@
     box-shadow:0 0 16px color-mix(in srgb,var(--c) 55%,transparent),inset 0 0 12px color-mix(in srgb,var(--c) 25%,transparent);
   }
   .opt:disabled{cursor:default}
+  .opt small{display:block;margin-top:5px;font-size:16px;font-weight:500;letter-spacing:.06em;text-transform:none;opacity:.8}
   .opt .pips{display:flex;gap:4px;justify-content:center;margin-top:7px}
   .opt .pips i{width:7px;height:7px;border-radius:50%;border:1px solid var(--c);opacity:.5}
   .opt .pips i.on{background:var(--c);opacity:1;box-shadow:0 0 6px var(--c)}
@@ -103,7 +104,7 @@
   .opt.medium{--c:#ffd24a}
   .opt.hard{--c:#ff4d6a}
   .hint{margin-top:12px;min-height:22px;font-size:17px;font-weight:500;letter-spacing:.08em;opacity:.85}
-  .menu .start{margin-top:34px;--c:var(--x);padding:12px 54px;font-size:22px}
+  .menu .start{margin-top:26px;--c:var(--x);padding:12px 54px;font-size:22px}
   .prefs{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-top:24px}
   .pref{
     display:inline-flex;align-items:center;gap:8px;min-height:40px;padding:5px 16px;
@@ -145,10 +146,12 @@
   /* ---------- floating board ---------- */
   .stage-wrap{perspective:900px;display:flex;flex-direction:column;align-items:center;width:100%}
   .stage{
-    width:clamp(220px,min(84vw,100dvh - 330px),460px);aspect-ratio:1;position:relative;
+    width:clamp(220px,min(84vw,100dvh - 330px),460px);
+    flex:none;aspect-ratio:1;position:relative;
     transform-style:preserve-3d;
     animation:hover 7s ease-in-out infinite;
   }
+  .stage.big{width:clamp(280px,min(94vw,100dvh - 300px),620px)}
   @keyframes hover{
     0%,100%{transform:translateY(0) rotateX(4deg) rotateY(-2.5deg)}
     25%{transform:translateY(-9px) rotateX(2deg) rotateY(0deg)}
@@ -172,10 +175,18 @@
     background:linear-gradient(135deg,rgba(160,150,255,.10),rgba(18,10,48,.14));
     border:1px solid rgba(140,125,255,.5);
     box-shadow:0 0 30px rgba(107,92,255,.35),inset 0 0 40px rgba(107,92,255,.12);
-    display:grid;grid-template-columns:repeat(3,1fr);grid-template-rows:repeat(3,1fr);
+    display:grid;grid-template-columns:repeat(var(--n,3),1fr);grid-template-rows:repeat(var(--n,3),1fr);
     padding:10px;
     transition:background .8s,border-color .8s,box-shadow .8s;
   }
+  /* 9×9: thinner grid and calmer glows so 81 cells stay readable (and cheap to render) */
+  .board.big .seg{opacity:.55;box-shadow:0 0 3px #fff,0 0 8px rgba(150,170,255,.7)}
+  .board.big .mark{stroke-width:10}
+  .board.big .mark.x{filter:drop-shadow(0 0 2px var(--x)) drop-shadow(0 0 5px var(--x))}
+  .board.big .mark.o{filter:drop-shadow(0 0 2px var(--o)) drop-shadow(0 0 5px var(--o))}
+  .board.big .glow-x,.board.big .glow-o{animation:none}
+  .board.big .cell.win .mark{animation:pulseWinBig 1s ease-in-out infinite}
+  @keyframes pulseWinBig{50%{stroke-width:14}}
   .board.broken{
     background:transparent;border-color:transparent;box-shadow:none;
     backdrop-filter:none;
@@ -330,17 +341,29 @@
 
   @media (max-height:560px) and (orientation:landscape){
     body{flex-direction:row;gap:clamp(24px,6vw,64px)}
-    .menu{padding:12px 16px}
-    .menu h1{font-size:clamp(20px,4.5vw,30px)}
+    /* two columns: title, start and settings on the left; the three choices on the right */
+    .menu{
+      display:grid;grid-template-columns:minmax(0,auto) minmax(0,340px);
+      justify-content:center;align-content:center;align-items:center;column-gap:clamp(20px,4vw,40px);
+      padding:8px 16px;
+    }
+    .menu h1{grid-area:1/1;font-size:clamp(20px,4vw,28px)}
     .menu .tag{display:none}
-    .menu fieldset{margin-top:8px}
-    .menu legend{margin-bottom:8px}
-    .opt{padding:8px;font-size:16px}
-    .hint{margin-top:6px;font-size:15px}
-    .menu .start{margin-top:12px;padding:8px 44px;font-size:19px}
-    .prefs{margin-top:10px}
+    .menu fieldset{margin-top:6px;width:100%}
+    .menu fieldset:nth-of-type(1){grid-area:1/2}
+    .menu fieldset:nth-of-type(2){grid-area:2/2}
+    .menu fieldset:nth-of-type(3){grid-area:3/2}
+    .menu legend{margin-bottom:6px}
+    .opt{padding:6px;font-size:16px}
+    .opt small{margin-top:2px}
+    .hint{margin-top:4px;min-height:0;font-size:16px}
+    .menu .start{grid-area:2/1;justify-self:center;margin-top:0;padding:8px 44px;font-size:19px}
+    .prefs{grid-area:3/1;margin-top:0}
     .stage-wrap{width:auto}
-    .stage{width:clamp(200px,100dvh - 130px,420px)}
+    .stage,.stage.big{width:clamp(200px,100dvh - 130px,420px)}
+    /* 9×9 needs every pixel for tappable cells: drop the floor shadow */
+    .stage.big{width:clamp(200px,100dvh - 84px,420px)}
+    .stage.big + .shadow{display:none}
     .status{margin-bottom:12px}
     .shadow{margin-top:14px;height:20px}
   }
@@ -368,6 +391,14 @@
     <div class="seg-group">
       <button class="opt" data-mode="cpu">vs Computer</button>
       <button class="opt" data-mode="2p" style="--c:var(--o)">2 Players</button>
+    </div>
+  </fieldset>
+
+  <fieldset>
+    <legend>Board</legend>
+    <div class="seg-group">
+      <button class="opt" data-size="3">3 × 3<small>3 in a row</small></button>
+      <button class="opt" data-size="9" style="--c:var(--o)">9 × 9<small>5 in a row</small></button>
     </div>
   </fieldset>
 
@@ -436,7 +467,6 @@
 
 <script>
 (() => {
-  const WINS = [[0,1,2],[3,4,5],[6,7,8],[0,3,6],[1,4,7],[2,5,8],[0,4,8],[2,4,6]];
   const COLORS = {X:'#18e8ff', O:'#ff2bd6'};
   const boardEl = document.getElementById('board');
   const ripplesEl = document.getElementById('ripples');
@@ -453,34 +483,59 @@
   const sleep = ms => new Promise(r => setTimeout(r, ms));
 
   const LEVELS = {
-    easy:   {label: 'Easy',   color: '#5dffa8', hint: 'Plays loose and misses plenty'},
-    medium: {label: 'Medium', color: '#ffd24a', hint: 'Takes wins and blocks, but can be tricked'},
-    hard:   {label: 'Hard',   color: '#ff4d6a', hint: 'Perfect play. The best you can do is draw'}
+    easy:   {label: 'Easy',   color: '#5dffa8', hint: {3: 'Plays loose and misses plenty', 9: 'Often misses your threats'}},
+    medium: {label: 'Medium', color: '#ffd24a', hint: {3: 'Takes wins and blocks, but can be tricked', 9: 'Blocks what it sees, but can be outplanned'}},
+    hard:   {label: 'Hard',   color: '#ff4d6a', hint: {3: 'Perfect play. The best you can do is draw', 9: 'Hunts forced wins, blocks your threats'}}
   };
-  let cells = [], state, turn, over, mode = 'cpu', level = 'medium', busy, seq = 0;
+  let cells = [], state, turn, over, mode = 'cpu', level = 'medium', size = 3, busy, seq = 0;
+
+  // ---------- board geometry: N×N board, K in a row wins ----------
+  const WIN_LENGTH = {3: 3, 9: 5};
+  let N = 3, K = 3, LINES = [], LINES_AT = [];
+  function setGeometry(n) {
+    N = n; K = WIN_LENGTH[n]; LINES = [];
+    for (let r = 0; r < N; r++) for (let c = 0; c < N; c++) {
+      for (const [dr, dc] of [[0, 1], [1, 0], [1, 1], [1, -1]]) {
+        const er = r + dr * (K - 1), ec = c + dc * (K - 1);
+        if (er >= N || ec < 0 || ec >= N) continue;
+        LINES.push(Array.from({length: K}, (_, t) => (r + dr * t) * N + c + dc * t));
+      }
+    }
+    LINES_AT = Array.from({length: N * N}, () => []);       // the lines through each cell
+    LINES.forEach((l, li) => l.forEach(i => LINES_AT[i].push(li)));
+  }
+  setGeometry(3);
   const scores = {X:0, O:0, D:0};
 
   // ---------- build board ----------
-  for (let i = 0; i < 9; i++) {
-    const b = document.createElement('button');
-    b.className = 'cell';
-    b.addEventListener('click', e => onTap(i, e.detail ? e : null));  // detail 0 = keyboard
-    boardEl.appendChild(b);
-    cells.push(b);
+  const stageEl = document.querySelector('.stage');
+  function buildCells() {
+    cells.forEach(c => c.remove());
+    cells = [];
+    for (let i = 0; i < N * N; i++) {
+      const b = document.createElement('button');
+      b.className = 'cell';
+      b.addEventListener('click', e => onTap(i, e.detail ? e : null));  // detail 0 = keyboard
+      boardEl.appendChild(b);
+      cells.push(b);
+    }
+    boardEl.style.setProperty('--n', N);
+    boardEl.classList.toggle('big', N > 3);
+    stageEl.classList.toggle('big', N > 3);
   }
 
-  // grid lines: 2 vertical + 2 horizontal, each cut into 3 pieces
+  // grid lines: N-1 vertical + N-1 horizontal, each cut into N pieces so they can break apart
   function buildGrid() {
     gridEl.replaceChildren();
-    const third = 100 / 3;
-    for (let k = 1; k <= 2; k++) {
-      for (let j = 0; j < 3; j++) {
+    const f = 100 / N;
+    for (let k = 1; k < N; k++) {
+      for (let j = 0; j < N; j++) {
         const v = document.createElement('i');
         v.className = 'seg';
-        v.style.cssText = `left:calc(${k * third}% - 1px);top:${j * third}%;width:2px;height:${third}%`;
+        v.style.cssText = `left:calc(${k * f}% - 1px);top:${j * f}%;width:2px;height:${f}%`;
         const h = document.createElement('i');
         h.className = 'seg';
-        h.style.cssText = `top:calc(${k * third}% - 1px);left:${j * third}%;height:2px;width:${third}%`;
+        h.style.cssText = `top:calc(${k * f}% - 1px);left:${j * f}%;height:2px;width:${f}%`;
         gridEl.append(v, h);
       }
     }
@@ -519,7 +574,7 @@
     r.style.top = y + 'px';
     r.style.color = color;
     ripplesEl.appendChild(r);
-    const size = boardEl.clientWidth * 0.5;
+    const size = boardEl.clientWidth * (N > 3 ? .25 : .5);
     const a = r.animate(
       [{transform: 'scale(0.4)', opacity: .9},
        {transform: 'scale(' + size / 10 + ')', opacity: 0}],
@@ -618,7 +673,7 @@
   // ---------- game flow ----------
   function reset(rebuild) {
     seq++;                       // cancels any running win sequence
-    state = Array(9).fill(null);
+    state = Array(N * N).fill(null);
     turn = 'X'; over = false; busy = false;
     boardEl.classList.remove('over', 'broken', 'shake', 'flash');
     boardEl.querySelectorAll('.winline').forEach(n => n.remove());
@@ -651,7 +706,7 @@
   }
 
   function labelCell(i) {
-    const pos = 'Row ' + (Math.floor(i / 3) + 1) + ', column ' + (i % 3 + 1);
+    const pos = 'Row ' + (Math.floor(i / N) + 1) + ', column ' + (i % N + 1);
     cells[i].setAttribute('aria-label', pos + (state[i] ? ', ' + state[i] : ', empty'));
   }
 
@@ -727,7 +782,179 @@
     return best;
   }
 
+  // ---------- 9×9 opponent (five in a row) ----------
+  // Every 5-cell window that holds only one player's marks is still a way to win. A cell is worth
+  // what it adds to our windows (attack) plus what it takes away from the opponent's (defence).
+  const WEIGHT = [0, 1, 8, 60, 500, 100000];
+  const other = p => p === 'O' ? 'X' : 'O';
+
+  function cellValue(s, i, p) {
+    const q = other(p);
+    let attack = 0, defend = 0;
+    for (const li of LINES_AT[i]) {
+      let mine = 0, theirs = 0;
+      for (const j of LINES[li]) { if (s[j] === p) mine++; else if (s[j] === q) theirs++; }
+      if (!theirs) attack += WEIGHT[mine + 1];
+      if (!mine) defend += WEIGHT[theirs + 1];
+    }
+    return [attack, defend];
+  }
+
+  // empty cells within two steps of any mark; the centre on an empty board
+  function nearCells(s) {
+    const out = [];
+    for (let i = 0; i < s.length; i++) {
+      if (s[i]) continue;
+      const r = Math.floor(i / N), c = i % N;
+      search: for (let dr = -2; dr <= 2; dr++) for (let dc = -2; dc <= 2; dc++) {
+        const rr = r + dr, cc = c + dc;
+        if (rr >= 0 && rr < N && cc >= 0 && cc < N && s[rr * N + cc]) { out.push(i); break search; }
+      }
+    }
+    return out.length ? out : [Math.floor(N * N / 2)];
+  }
+
+  function winsAt(s, i, p) {
+    return LINES_AT[i].some(li => LINES[li].every(j => j === i || s[j] === p));
+  }
+
+  // cells where p would complete a line on their next move
+  function threatCells(s, p) {
+    const found = new Set();
+    for (const l of LINES) {
+      let mine = 0, gap = -1, blocked = false;
+      for (const j of l) {
+        if (s[j] === p) mine++;
+        else if (s[j]) { blocked = true; break; }
+        else gap = j;
+      }
+      if (!blocked && mine === K - 1) found.add(gap);
+    }
+    return found;
+  }
+
+  // does placing p at i leave two or more ways to win? (an open four, or two fours: unstoppable)
+  function makesDoubleThreat(s, i, p) {
+    s[i] = p;
+    const n = threatCells(s, p).size;
+    s[i] = null;
+    return n >= 2;
+  }
+
+  // threats p's mark at i creates: cells on lines through i that now need just one more p
+  function threatsThrough(s, i, p) {
+    const out = [];
+    for (const li of LINES_AT[i]) {
+      let mine = 0, gap = -1, blocked = false;
+      for (const j of LINES[li]) {
+        if (s[j] === p) mine++;
+        else if (s[j]) { blocked = true; break; }
+        else gap = j;
+      }
+      if (!blocked && mine === K - 1 && !out.includes(gap)) out.push(gap);
+    }
+    return out;
+  }
+
+  // cells where p would make a four
+  function fourMoves(s, p) {
+    const found = new Set();
+    for (const l of LINES) {
+      let mine = 0, blocked = false;
+      const gaps = [];
+      for (const j of l) {
+        if (s[j] === p) mine++;
+        else if (s[j]) { blocked = true; break; }
+        else gaps.push(j);
+      }
+      if (!blocked && mine === K - 2) gaps.forEach(j => found.add(j));
+    }
+    return [...found];
+  }
+
+  // victory by continuous fours: each four forces a block, until one move makes two threats at once.
+  // Returns the first move of such a sequence, or null.
+  function findVCF(s, me, depth, budget) {
+    if (depth === 0 || budget.n-- <= 0) return null;
+    const them = other(me);
+    for (const i of fourMoves(s, me)) {
+      s[i] = me;
+      const t = threatsThrough(s, i, me);
+      let found = false;
+      if (t.length >= 2) found = true;
+      else if (t.length === 1) {
+        const b = t[0];
+        s[b] = them;                                    // their forced block
+        // if the block gives them a four, the sequence is no longer forcing
+        found = !threatsThrough(s, b, them).length && findVCF(s, me, depth - 1, budget) !== null;
+        s[b] = null;
+      }
+      s[i] = null;
+      if (found) return i;
+    }
+    return null;
+  }
+  const hasVCF = (s, p, n = 1500) => findVCF(s, p, 10, {n}) !== null;
+
+  // would p have a forced win if they got to play i? (two threats at once, or a chain of fours)
+  function setsUpWin(s, i, p) {
+    s[i] = p;
+    const yes = threatCells(s, p).size >= 2 || hasVCF(s, p, 100);
+    s[i] = null;
+    return yes;
+  }
+
+  function gomokuMove(s, me, lvl) {
+    const them = other(me), cand = nearCells(s);
+    const win = cand.find(i => winsAt(s, i, me));
+    if (win !== undefined) return win;
+    const block = cand.find(i => winsAt(s, i, them));
+    if (block !== undefined && (lvl !== 'easy' || Math.random() < .6)) return block;
+
+    const defenceWeight = {easy: .5, medium: .85, hard: 1}[lvl];
+    const value = i => { const [a, d] = cellValue(s, i, me); return a + defenceWeight * d; };
+
+    if (lvl !== 'easy') {
+      // a move that leaves two ways to win can't be stopped
+      const killer = cand.find(i => makesDoubleThreat(s, i, me));
+      if (killer !== undefined) return killer;
+    }
+    const ranked = cand.map(i => ({i, v: value(i)})).sort((a, b) => b.v - a.v);
+
+    if (lvl === 'hard') {
+      // a forced win through a chain of fours
+      const vcf = findVCF(s, me, 12, {n: 4000});
+      if (vcf !== null) return vcf;
+      // look one move ahead for the opponent: which of their moves would leave them a forced win
+      // (an open three or a fork about to happen)? Try the likely replies and keep the one that
+      // leaves them the fewest such moves.
+      const danger = cand.filter(i => setsUpWin(s, i, them));
+      if (danger.length || hasVCF(s, them)) {
+        // best-looking replies first, so the first one that leaves nothing is also the best of those
+        const pool = new Set([...danger, ...fourMoves(s, them), ...ranked.slice(0, 8).map(c => c.i)]);
+        const tries = [...pool].map(i => ({i, v: value(i)})).sort((a, b) => b.v - a.v);
+        let best = null, bestCost = Infinity;
+        for (const {i} of tries) {
+          if (s[i]) continue;
+          s[i] = me;
+          // still a forced win for them: ruled out, no need to count the rest
+          const cost = hasVCF(s, them, 400) ? 1000 : danger.filter(d => !s[d] && setsUpWin(s, d, them)).length;
+          s[i] = null;
+          if (cost < bestCost) { best = i; bestCost = cost; }
+          if (cost === 0) break;
+        }
+        return best;
+      }
+    }
+
+    if (lvl === 'easy') return pickRandom(ranked.slice(0, 5)).i;
+    if (lvl === 'medium') return (Math.random() < .25 && ranked[1] ? ranked[1] : ranked[0]).i;
+    const top = ranked.filter(c => c.v === ranked[0].v);   // hard: best, ties broken randomly
+    return pickRandom(top).i;
+  }
+
   function chooseMove() {
+    if (N > 3) return gomokuMove(state, 'O', level);
     const free = freeCells(state);
     if (level === 'easy') {
       // mostly random, occasionally spots a quick win
@@ -768,9 +995,8 @@
   }
 
   function findWin(s) {
-    for (const w of WINS) {
-      const [a, b, c] = w;
-      if (s[a] && s[a] === s[b] && s[a] === s[c]) return w;
+    for (const l of LINES) {
+      if (s[l[0]] && l.every(j => s[j] === s[l[0]])) return l;
     }
     return null;
   }
@@ -859,10 +1085,11 @@
     svg.setAttribute('viewBox', '0 0 300 300');
     svg.setAttribute('class', 'winline');
     svg.style.setProperty('--c', color);
-    const c = i => [(i % 3) * 100 + 50, Math.floor(i / 3) * 100 + 50];
-    let [x1, y1] = c(line[0]), [x2, y2] = c(line[2]);
+    const cell = 300 / N;
+    const c = i => [(i % N + .5) * cell, (Math.floor(i / N) + .5) * cell];
+    let [x1, y1] = c(line[0]), [x2, y2] = c(line[line.length - 1]);
     const dx = x2 - x1, dy = y2 - y1, len = Math.hypot(dx, dy);
-    const ext = 22;
+    const ext = cell * .22;
     x1 -= dx / len * ext; y1 -= dy / len * ext;
     x2 += dx / len * ext; y2 += dy / len * ext;
     const l = document.createElementNS(s, 'line');
@@ -877,8 +1104,8 @@
 
   function sparks(line, color, n, power) {
     const W = boardEl.clientWidth - 20;
-    const pt = i => [10 + ((i % 3) * 100 + 50) / 300 * W, 10 + (Math.floor(i / 3) * 100 + 50) / 300 * W];
-    const [ax, ay] = pt(line[0]), [bx, by] = pt(line[2]);
+    const pt = i => [10 + (i % N + .5) / N * W, 10 + (Math.floor(i / N) + .5) / N * W];
+    const [ax, ay] = pt(line[0]), [bx, by] = pt(line[line.length - 1]);
     for (let k = 0; k < n; k++) {
       const t = Math.random();
       const x = ax + (bx - ax) * t, y = ay + (by - ay) * t;
@@ -988,21 +1215,25 @@
   const diffHint = document.getElementById('diffHint');
   const modeBtns = [...menuEl.querySelectorAll('[data-mode]')];
   const levelBtns = [...menuEl.querySelectorAll('[data-level]')];
+  const sizeBtns = [...menuEl.querySelectorAll('[data-size]')];
 
   try {
     const saved = JSON.parse(localStorage.getItem('ttt-setup'));
     if (saved && ['cpu', '2p'].includes(saved.mode)) mode = saved.mode;
     if (saved && LEVELS[saved.level]) level = saved.level;
+    if (saved && WIN_LENGTH[saved.size]) size = saved.size;
   } catch (e) {}
 
   function renderMenu() {
     modeBtns.forEach(b => b.setAttribute('aria-pressed', b.dataset.mode === mode));
     levelBtns.forEach(b => b.setAttribute('aria-pressed', b.dataset.level === level));
+    sizeBtns.forEach(b => b.setAttribute('aria-pressed', +b.dataset.size === size));
     diffSet.disabled = mode !== 'cpu';
-    diffHint.textContent = mode === 'cpu' ? LEVELS[level].hint : 'Difficulty only applies against the computer';
+    diffHint.textContent = mode === 'cpu' ? LEVELS[level].hint[size] : 'Difficulty only applies against the computer';
   }
   modeBtns.forEach(b => b.onclick = () => { mode = b.dataset.mode; renderMenu(); sfx.click(); });
   levelBtns.forEach(b => b.onclick = () => { level = b.dataset.level; renderMenu(); sfx.click(); });
+  sizeBtns.forEach(b => b.onclick = () => { size = +b.dataset.size; renderMenu(); sfx.click(); });
 
   function openMenu() {
     seq++;                       // stop any running win sequence or CPU turn
@@ -1014,16 +1245,17 @@
   }
 
   function startGame() {
-    try { localStorage.setItem('ttt-setup', JSON.stringify({mode, level})); } catch (e) {}
+    try { localStorage.setItem('ttt-setup', JSON.stringify({mode, level, size})); } catch (e) {}
+    if (size !== N || !cells.length) { setGeometry(size); buildCells(); }
     const n = names();
     document.getElementById('lx').textContent = mode === 'cpu' ? n.X : '';   // in 2P the icon says it all
     document.getElementById('lo').textContent = mode === 'cpu' ? n.O : '';
     const chip = document.getElementById('modeChip');
     if (mode === 'cpu') {
-      chip.innerHTML = `vs CPU · <b>${LEVELS[level].label}</b>`;
+      chip.innerHTML = `${N}×${N} · <b>${LEVELS[level].label}</b>`;
       chip.style.setProperty('--lvl', LEVELS[level].color);
     } else {
-      chip.textContent = '2 Players';
+      chip.textContent = `${N}×${N} · 2 Players`;
     }
     scores.X = scores.O = scores.D = 0;
     updateScores();
@@ -1034,7 +1266,7 @@
 
   // put keyboard focus on the board so arrow keys work straight away
   function focusBoard() {
-    setTimeout(() => cells[4].focus({preventScroll: true}), 30);
+    setTimeout(() => cells[Math.floor(N * N / 2)].focus({preventScroll: true}), 30);
   }
 
   boardEl.addEventListener('keydown', e => {
@@ -1043,9 +1275,9 @@
     const moves = {ArrowLeft: [0, -1], ArrowRight: [0, 1], ArrowUp: [-1, 0], ArrowDown: [1, 0]};
     if (!moves[e.key]) return;
     e.preventDefault();
-    const r = Math.min(2, Math.max(0, Math.floor(i / 3) + moves[e.key][0]));
-    const c = Math.min(2, Math.max(0, i % 3 + moves[e.key][1]));
-    cells[r * 3 + c].focus();
+    const r = Math.min(N - 1, Math.max(0, Math.floor(i / N) + moves[e.key][0]));
+    const c = Math.min(N - 1, Math.max(0, i % N + moves[e.key][1]));
+    cells[r * N + c].focus();
   });
 
   addEventListener('keydown', e => {
@@ -1104,6 +1336,7 @@
   document.getElementById('motionPref').onclick = () => { reduce = !reduce; applyPrefs(true); sfx.click(); };
   applyPrefs(false);
 
+  buildCells();
   reset();
   openMenu();
 })();
