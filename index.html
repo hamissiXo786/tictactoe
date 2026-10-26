@@ -4,6 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Neon Tic Tac Toe</title>
+<meta name="claude:viewport-fit-sides" content="cover">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&family=Rajdhani:wght@500;600;700&display=swap" rel="stylesheet">
@@ -15,6 +16,16 @@
     --line:#6b5cff;   /* frame / ambient purple */
     --grid:#eef0ff;   /* grid tubes: bright ice-white, so they stand apart from the purple */
     --text:#cfd3ff;
+    /* controls: glass panels with neon-tube edges. Actions are pills (tubes), choices are tiles. */
+    --ink:#07041a;                        /* text on a lit (filled) button */
+    --panel:rgba(22,14,56,.55);
+    --panel-hi:rgba(40,28,92,.7);
+    --edge:rgba(170,160,255,.3);
+    --edge-hi:rgba(215,210,255,.75);
+    --focus:#ffffff;
+    --r-tile:14px;
+    --r-pill:999px;
+    color-scheme:dark;
     --display:'Orbitron',system-ui,-apple-system,"Segoe UI",sans-serif;
     --body:'Rajdhani',system-ui,-apple-system,"Segoe UI",sans-serif;
   }
@@ -46,22 +57,28 @@
   /* in-game: what you're playing + way back to the menu */
   .gamebar{display:flex;gap:10px;justify-content:center;align-items:center;margin-top:12px}
   .chip{
-    display:inline-flex;align-items:center;min-height:40px;
-    font-size:16px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;
-    padding:5px 14px;border-radius:999px;border:1px solid rgba(160,150,255,.3);color:var(--text);
+    padding:0 6px;font-size:16px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:var(--text);
+    white-space:nowrap;
   }
   .chip b{color:var(--lvl,#fff);font-weight:700;text-shadow:0 0 10px var(--lvl,transparent)}
   .linkbtn{
-    background:transparent;color:var(--text);font-family:var(--body);cursor:pointer;
-    border:1px solid rgba(160,150,255,.4);border-radius:999px;
-    min-height:40px;padding:5px 16px;font-size:16px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;
-    transition:border-color .25s,color .25s,transform .12s;
+    display:inline-flex;align-items:center;justify-content:center;gap:6px;
+    min-height:44px;padding:0 18px 0 13px;border-radius:var(--r-pill);cursor:pointer;
+    background:var(--panel);color:var(--text);border:1.5px solid var(--edge);
+    font-family:var(--body);font-size:16px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.06);
+    transition:border-color .2s,color .2s,background .2s,transform .12s;
   }
-  .linkbtn.icon{width:40px;padding:0;display:inline-grid;place-items:center}
-  .linkbtn.icon svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+  .linkbtn:hover{border-color:var(--edge-hi);color:#fff;background:var(--panel-hi)}
+  .linkbtn svg{width:18px;height:18px;flex:none;fill:none;stroke:currentColor;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
+  .linkbtn.icon{width:44px;padding:0}
+  .linkbtn.icon svg{width:20px;height:20px}
   .linkbtn.icon .off,.linkbtn.icon[aria-pressed="false"] .on{display:none}
   .linkbtn.icon[aria-pressed="false"] .off{display:inline}
-  .linkbtn:hover,.linkbtn:focus-visible{border-color:#fff;color:#fff;outline:none}
+  .linkbtn.icon[aria-pressed="false"]{color:color-mix(in srgb,var(--text) 60%,transparent)}
+
+  /* one focus ring for every control, distinct from hover */
+  .btn:focus-visible,.opt:focus-visible,.linkbtn:focus-visible,.pref:focus-visible{outline:2px solid var(--focus);outline-offset:3px}
 
   /* ---------- start screen ---------- */
   .menu{
@@ -77,7 +94,8 @@
   .menu h1{font-size:clamp(24px,7vw,42px)}
   .menu .tag{margin-top:10px;font-size:17px;font-weight:600;letter-spacing:.24em;text-transform:uppercase;opacity:.7}
   .menu fieldset{border:0;margin:22px 0 0;padding:0;min-width:0;width:min(100%,420px);transition:opacity .3s}
-  .menu fieldset[disabled]{opacity:.3}
+  .menu fieldset[disabled]{opacity:.35}
+  .menu fieldset[disabled] .opt{box-shadow:none;cursor:not-allowed}
   .menu legend{
     padding:0;margin:0 auto 12px;font-size:16px;font-weight:600;letter-spacing:.3em;
     text-transform:uppercase;color:var(--text);opacity:.8;
@@ -85,17 +103,27 @@
   .seg-group{display:flex;gap:8px}
   .opt{
     --c:var(--x);
-    flex:1;min-width:0;background:rgba(20,12,50,.45);color:var(--text);cursor:pointer;
-    font-family:var(--body);font-weight:600;font-size:18px;letter-spacing:.1em;text-transform:uppercase;
-    border:1px solid rgba(160,150,255,.3);border-radius:14px;padding:12px 8px;
-    transition:border-color .25s,box-shadow .25s,color .25s,transform .2s;
+    position:relative;flex:1;min-width:0;min-height:54px;
+    display:flex;flex-direction:column;align-items:center;justify-content:center;
+    background:var(--panel);color:var(--text);cursor:pointer;
+    font-family:var(--body);font-weight:700;font-size:18px;letter-spacing:.1em;text-transform:uppercase;
+    border:1.5px solid var(--edge);border-radius:var(--r-tile);padding:12px 10px;
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.05);
+    transition:border-color .2s,box-shadow .25s,color .2s,background .2s,transform .12s;
   }
-  .opt:hover:not(:disabled),.opt:focus-visible{border-color:#fff;outline:none}
+  /* indicator light: hollow when off, lit when on, so the choice never relies on colour alone */
+  .opt::after{
+    content:"";position:absolute;top:9px;right:9px;width:8px;height:8px;border-radius:50%;
+    border:1.5px solid var(--edge-hi);opacity:.55;transition:all .2s;
+  }
+  .opt:hover:not(:disabled){border-color:var(--edge-hi);background:var(--panel-hi)}
   .opt[aria-pressed="true"]{
     border-color:var(--c);color:#fff;
-    box-shadow:0 0 16px color-mix(in srgb,var(--c) 55%,transparent),inset 0 0 12px color-mix(in srgb,var(--c) 25%,transparent);
+    background:linear-gradient(180deg,color-mix(in srgb,var(--c) 20%,transparent),color-mix(in srgb,var(--c) 6%,transparent));
+    box-shadow:0 0 18px color-mix(in srgb,var(--c) 40%,transparent),inset 0 0 14px color-mix(in srgb,var(--c) 18%,transparent);
+    text-shadow:0 0 12px color-mix(in srgb,var(--c) 60%,transparent);
   }
-  .opt:disabled{cursor:default}
+  .opt[aria-pressed="true"]::after{border-color:var(--c);background:var(--c);opacity:1;box-shadow:0 0 8px var(--c)}
   .opt small{display:block;margin-top:5px;font-size:16px;font-weight:500;letter-spacing:.06em;text-transform:none;opacity:.8}
   .opt .pips{display:flex;gap:4px;justify-content:center;margin-top:7px}
   .opt .pips i{width:7px;height:7px;border-radius:50%;border:1px solid var(--c);opacity:.5}
@@ -104,28 +132,39 @@
   .opt.medium{--c:#ffd24a}
   .opt.hard{--c:#ff4d6a}
   .hint{margin-top:12px;min-height:22px;font-size:17px;font-weight:500;letter-spacing:.08em;opacity:.85}
-  .menu .start{margin-top:26px;--c:var(--x);padding:12px 54px;font-size:22px}
-  .prefs{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-top:24px}
+  .menu .start{margin-top:26px;--c:var(--x);min-height:56px;padding:0 60px;font-size:18px}
+  .prefs{display:flex;gap:6px 26px;justify-content:center;flex-wrap:wrap;margin-top:20px}
+  /* on/off settings look like switches, because that's what they are */
   .pref{
-    display:inline-flex;align-items:center;gap:8px;min-height:40px;padding:5px 16px;
-    background:transparent;color:var(--text);cursor:pointer;font-family:var(--body);
-    font-size:16px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;
-    border:1px solid rgba(160,150,255,.3);border-radius:999px;transition:border-color .25s,transform .12s;
+    display:inline-flex;align-items:center;gap:12px;min-height:44px;padding:0 6px;border-radius:10px;
+    background:none;border:0;color:var(--text);cursor:pointer;font-family:var(--body);
+    font-size:16px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;
   }
-  .pref:hover,.pref:focus-visible{border-color:#fff;outline:none}
-  .pref .dot{width:9px;height:9px;border-radius:50%;border:1px solid currentColor;opacity:.6}
-  .pref[aria-pressed="true"]{color:#fff}
-  .pref[aria-pressed="true"] .dot{background:var(--x);border-color:var(--x);opacity:1;box-shadow:0 0 8px var(--x)}
+  .pref .sw{
+    position:relative;flex:none;width:40px;height:23px;border-radius:var(--r-pill);
+    background:rgba(8,5,24,.8);border:1.5px solid var(--edge);transition:all .2s;
+  }
+  .pref .sw::after{
+    content:"";position:absolute;top:2.5px;left:3px;width:15px;height:15px;border-radius:50%;
+    background:var(--text);opacity:.55;transition:transform .2s,background .2s,opacity .2s,box-shadow .2s;
+  }
+  .pref:hover .sw{border-color:var(--edge-hi)}
+  .pref[aria-checked="true"]{color:#fff}
+  .pref[aria-checked="true"] .sw{
+    border-color:var(--x);background:color-mix(in srgb,var(--x) 22%,transparent);
+    box-shadow:0 0 10px color-mix(in srgb,var(--x) 40%,transparent);
+  }
+  .pref[aria-checked="true"] .sw::after{transform:translateX(16px);background:var(--x);opacity:1;box-shadow:0 0 8px var(--x)}
 
   /* pressed feel on every button */
-  .btn:active,.opt:active:not(:disabled),.linkbtn:active,.pref:active{transform:scale(.95)}
+  .btn:active,.opt:active:not(:disabled),.linkbtn:active,.pref:active{transform:scale(.96)}
 
   .scores{display:flex;gap:10px;justify-content:center;margin-top:14px}
   .score{
     --c:var(--text);
     display:flex;align-items:center;gap:8px;min-width:88px;justify-content:center;
-    padding:6px 14px;border-radius:14px;color:var(--c);
-    border:1px solid rgba(160,150,255,.18);background:rgba(20,12,50,.35);
+    padding:6px 14px;border-radius:var(--r-tile);color:var(--c);
+    border:1.5px solid rgba(170,160,255,.16);background:rgba(20,12,50,.35);
     transition:border-color .3s,box-shadow .3s,opacity .3s;
   }
   .score.sx{--c:var(--x)}
@@ -327,17 +366,32 @@
   .btns{display:flex;gap:14px;justify-content:center;margin-top:28px;flex-wrap:wrap}
   .btn{
     --c:#cfd3ff;
-    background:transparent;color:#fff;cursor:pointer;
-    font-family:var(--body);font-weight:600;
-    border:1px solid rgba(207,211,255,.45);border-radius:999px;
-    padding:10px 30px;font-size:20px;letter-spacing:.12em;text-transform:uppercase;
-    transition:transform .2s,box-shadow .25s,border-color .25s;
+    display:inline-flex;align-items:center;justify-content:center;
+    min-height:50px;padding:0 32px;border-radius:var(--r-pill);cursor:pointer;
+    background:rgba(10,6,28,.6);color:#fff;
+    border:1.5px solid color-mix(in srgb,var(--c) 50%,transparent);
+    font-family:var(--body);font-weight:700;font-size:19px;letter-spacing:.14em;text-transform:uppercase;
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.07);
+    transition:transform .12s,box-shadow .25s,border-color .2s,background .2s,filter .2s;
   }
-  .btn:hover,.btn:focus-visible{transform:translateY(-2px);border-color:#fff;outline:none}
+  .btn:hover{
+    border-color:var(--c);background:rgba(18,10,46,.75);
+    box-shadow:0 0 14px color-mix(in srgb,var(--c) 40%,transparent),inset 0 0 10px color-mix(in srgb,var(--c) 18%,transparent);
+  }
+  /* primary: the tube is lit - solid colour, dark text */
   .btn.primary{
-    border-color:var(--c);
-    box-shadow:0 0 16px var(--c),inset 0 0 12px color-mix(in srgb,var(--c) 40%,transparent);
+    color:var(--ink);border-color:transparent;
+    font-family:var(--display);font-size:16px;letter-spacing:.2em;
+    background:linear-gradient(180deg,color-mix(in srgb,var(--c) 55%,#fff) 0%,var(--c) 52%,color-mix(in srgb,var(--c) 78%,#000) 100%);
+    box-shadow:0 0 16px color-mix(in srgb,var(--c) 65%,transparent),0 0 40px color-mix(in srgb,var(--c) 28%,transparent),
+               inset 0 1px 0 rgba(255,255,255,.65),inset 0 -2px 0 rgba(0,0,0,.2);
   }
+  .btn.primary:hover{
+    filter:brightness(1.08);
+    box-shadow:0 0 22px color-mix(in srgb,var(--c) 80%,transparent),0 0 56px color-mix(in srgb,var(--c) 36%,transparent),
+               inset 0 1px 0 rgba(255,255,255,.7),inset 0 -2px 0 rgba(0,0,0,.2);
+  }
+  .btn.primary:active{filter:brightness(.94)}
 
   @media (max-height:560px) and (orientation:landscape){
     body{flex-direction:row;gap:clamp(24px,6vw,64px)}
@@ -354,10 +408,11 @@
     .menu fieldset:nth-of-type(2){grid-area:2/2}
     .menu fieldset:nth-of-type(3){grid-area:3/2}
     .menu legend{margin-bottom:6px}
-    .opt{padding:6px;font-size:16px}
+    .opt{padding:6px;min-height:44px;font-size:16px;letter-spacing:.05em}
+    .opt::after{top:6px;right:6px;width:7px;height:7px}
     .opt small{margin-top:2px}
     .hint{margin-top:4px;min-height:0;font-size:16px}
-    .menu .start{grid-area:2/1;justify-self:center;margin-top:0;padding:8px 44px;font-size:19px}
+    .menu .start{grid-area:2/1;justify-self:center;margin-top:0;min-height:48px;padding:0 44px;font-size:16px}
     .prefs{grid-area:3/1;margin-top:0}
     .stage-wrap{width:auto}
     .stage,.stage.big{width:clamp(200px,100dvh - 130px,420px)}
@@ -415,8 +470,8 @@
   <button class="btn primary start" id="startBtn">Start</button>
 
   <div class="prefs">
-    <button class="pref" id="soundPref" aria-pressed="true"><span class="dot"></span>Sound</button>
-    <button class="pref" id="motionPref" aria-pressed="false"><span class="dot"></span>Reduce motion</button>
+    <button class="pref" id="soundPref" role="switch" aria-checked="true"><span class="sw"></span>Sound</button>
+    <button class="pref" id="motionPref" role="switch" aria-checked="false"><span class="sw"></span>Reduce motion</button>
   </div>
 </section>
 
@@ -427,7 +482,7 @@
     <button class="linkbtn icon" id="soundBtn" aria-label="Sound" aria-pressed="true">
       <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9h4l5-4v14l-5-4H4z"/><path class="on" d="M16.5 8.5a5 5 0 0 1 0 7M19 6a8.5 8.5 0 0 1 0 12"/><path class="off" d="M17 9l5 6M22 9l-5 6"/></svg>
     </button>
-    <button class="linkbtn" id="menuBtn">Menu</button>
+    <button class="linkbtn" id="menuBtn"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14.5 5.5L8 12l6.5 6.5"/></svg>Menu</button>
   </div>
   <div class="scores" aria-label="Score">
     <div class="score sx" id="tx">
@@ -1235,13 +1290,17 @@
   levelBtns.forEach(b => b.onclick = () => { level = b.dataset.level; renderMenu(); sfx.click(); });
   sizeBtns.forEach(b => b.onclick = () => { size = +b.dataset.size; renderMenu(); sfx.click(); });
 
+  let usingKeyboard = false;
+  addEventListener('keydown', () => usingKeyboard = true, true);
+  addEventListener('pointerdown', () => usingKeyboard = false, true);
+
   function openMenu() {
     seq++;                       // stop any running win sequence or CPU turn
     over = true;
     hideOverlay();
     renderMenu();
     document.body.classList.add('in-menu');
-    setTimeout(() => menuEl.querySelector('.start').focus({preventScroll: true}), 50);
+    setTimeout(() => menuEl.querySelector('.start').focus({preventScroll: true, focusVisible: usingKeyboard}), 50);
   }
 
   function startGame() {
@@ -1324,9 +1383,9 @@
 
   function applyPrefs(save) {
     document.body.classList.toggle('calm', reduce);
-    document.getElementById('soundPref').setAttribute('aria-pressed', soundOn);
+    document.getElementById('soundPref').setAttribute('aria-checked', soundOn);
     document.getElementById('soundBtn').setAttribute('aria-pressed', soundOn);
-    document.getElementById('motionPref').setAttribute('aria-pressed', reduce);
+    document.getElementById('motionPref').setAttribute('aria-checked', reduce);
     if (!reduce && !starsRunning) tick();
     if (save) try { localStorage.setItem('ttt-prefs', JSON.stringify({sound: soundOn, calm: reduce})); } catch (e) {}
   }
