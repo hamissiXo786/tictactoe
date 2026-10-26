@@ -539,7 +539,7 @@
 
   const LEVELS = {
     easy:   {label: 'Easy',   color: '#5dffa8', hint: {3: 'Plays loose and misses plenty', 9: 'Often misses your threats'}},
-    medium: {label: 'Medium', color: '#ffd24a', hint: {3: 'Takes wins and blocks, but can be tricked', 9: 'Blocks what it sees, but can be outplanned'}},
+    medium: {label: 'Medium', color: '#ffd24a', hint: {3: 'Solid, but slips up now and then', 9: 'Solid, but slips up now and then'}},
     hard:   {label: 'Hard',   color: '#ff4d6a', hint: {3: 'Perfect play. The best you can do is draw', 9: 'Hunts forced wins, blocks your threats'}}
   };
   let cells = [], state, turn, over, mode = 'cpu', level = 'medium', size = 3, busy, seq = 0;
@@ -837,6 +837,13 @@
     return best;
   }
 
+  // ---------- Medium slips up ----------
+  // Medium misses the important move now and then, and more often while it is on a winning
+  // streak, so a player who keeps losing gets a real chance. A win for the player resets it.
+  const SLIP = {base: {3: .1, 9: .25}, perLoss: .1, max: .6};
+  let cpuStreak = 0;                          // computer wins in a row since the game started
+  const slips = () => Math.random() < Math.min(SLIP.max, SLIP.base[N] + SLIP.perLoss * cpuStreak);
+
   // ---------- 9×9 opponent (five in a row) ----------
   // Every 5-cell window that holds only one player's marks is still a way to win. A cell is worth
   // what it adds to our windows (attack) plus what it takes away from the opponent's (defence).
@@ -959,12 +966,19 @@
     return yes;
   }
 
-  function gomokuMove(s, me, lvl) {
+  function gomokuMove(s, me, lvl, slip = false) {
     const them = other(me), cand = nearCells(s);
     const win = cand.find(i => winsAt(s, i, me));
     if (win !== undefined) return win;
     const block = cand.find(i => winsAt(s, i, them));
     if (block !== undefined && (lvl !== 'easy' || Math.random() < .6)) return block;
+
+    if (slip) {
+      // an off turn: plays for its own lines, half-ignores yours, and skips the forced-win checks
+      const loose = cand.map(i => { const [a, d] = cellValue(s, i, me); return {i, v: a + .3 * d}; })
+        .sort((a, b) => b.v - a.v);
+      return pickRandom(loose.slice(0, 3)).i;
+    }
 
     const defenceWeight = {easy: .5, medium: .85, hard: 1}[lvl];
     const value = i => { const [a, d] = cellValue(s, i, me); return a + defenceWeight * d; };
@@ -1009,7 +1023,7 @@
   }
 
   function chooseMove() {
-    if (N > 3) return gomokuMove(state, 'O', level);
+    if (N > 3) return gomokuMove(state, 'O', level, level === 'medium' && slips());
     const free = freeCells(state);
     if (level === 'easy') {
       // mostly random, occasionally spots a quick win
@@ -1020,11 +1034,15 @@
       return pickRandom(free);
     }
     if (level === 'medium') {
-      // always wins or blocks when it can, otherwise plays loosely, so forks beat it
+      // always takes a win; usually blocks yours, but a slip looks elsewhere. Forks also beat it.
       const w = winningMove(state, 'O');
       if (w !== null) return w;
       const b = winningMove(state, 'X');
-      if (b !== null) return b;
+      if (b !== null) {
+        if (!slips()) return b;
+        const elsewhere = free.filter(i => i !== b);
+        return pickRandom(elsewhere.length ? elsewhere : free);
+      }
       if (state[4] === null && Math.random() < 0.5) return 4;
       return pickRandom(free);
     }
@@ -1078,6 +1096,7 @@
 
     if (winner) {
       scores[winner]++;
+      if (mode === 'cpu') cpuStreak = winner === 'O' ? cpuStreak + 1 : 0;
       updateScores(winner);
       line.forEach(i => cells[i].classList.add('win'));
       boardEl.classList.add('over');
@@ -1317,6 +1336,7 @@
       chip.textContent = `${N}×${N} · 2 Players`;
     }
     scores.X = scores.O = scores.D = 0;
+    cpuStreak = 0;
     updateScores();
     document.body.classList.remove('in-menu');
     reset(true);
